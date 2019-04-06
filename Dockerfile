@@ -53,25 +53,6 @@ ENV PATH=$GRADLE_HOME/bin:$PATH
 
 RUN curl -o gradle-5.2.1-all.zip -L https://services.gradle.org/distributions/gradle-5.2.1-all.zip && unzip gradle-5.2.1-all.zip -d /usr/local > /dev/null
 
-# Run sshd
-RUN apt-get install -y openssh-server
-RUN mkdir -p /var/run/sshd
-RUN mkdir -p /root/.ssh
-
-#取消pam限制
-RUN sed -ri 's/session    required     pam_loginuid.so/#session    required     pam_loginuid.so/g' /etc/pam.d/sshd
-
-#复制配置文件到相应位置,并赋予脚本可执行权限
-ADD authorized_keys /root/.ssh/authorized_keys
-ADD run.sh /run.sh
-RUN chmod 755 /run.sh
-
-#开放端口
-EXPOSE 22
-
-#设置自启动命令
-CMD ["/run.sh"]
-
 RUN echo "y" | android update sdk -a --no-ui --filter sys-img-x86_64-android-21,Android-21
 
 VOLUME /data
