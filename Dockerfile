@@ -3,44 +3,14 @@ FROM ubuntu:16.04
 MAINTAINER Samuel "logan62334@gmail.com"
 
 # Specially for SSH access and port redirection
-ENV ROOTPASSWORD macaca
+ENV ROOTPASSWORD logan
 
-# Expose ADB, ADB control and VNC ports
+# Expose SSH ports
 EXPOSE 22
-EXPOSE 5037
-EXPOSE 5554
-EXPOSE 5555
-EXPOSE 5900
-EXPOSE 80
-EXPOSE 443
 
 ENV DEBIAN_FRONTEND noninteractive
 
-# kvm env
-ENV RAM 2048
-ENV SMP 1
-ENV CPU qemu64
-ENV DISK_DEVICE scsi
-ENV IMAGE /data/disk-image
-ENV IMAGE_FORMAT qcow2
-ENV IMAGE_SIZE 10G
-ENV IMAGE_CACHE none
-ENV IMAGE_DISCARD unmap
-ENV IMAGE_CREATE 0
-ENV ISO_DOWNLOAD 0
-ENV NETWORK tap
-ENV VNC none
-ENV VNC_IP ""
-ENV VNC_ID 0
-ENV VNC_PORT 5500
-ENV VNC_SOCK /data/vnc.sock
-ENV TCP_PORTS ""
-ENV UDP_PORTS ""
-
 WORKDIR /root
-
-#COPY ./etc/apt/sources.list_backup /etc/apt/sources.list
-#RUN apt update
 
 RUN apt-get update && \
     apt-get install -y qemu-kvm qemu-utils bridge-utils dnsmasq uml-utilities iptables wget net-tools && \
@@ -83,23 +53,11 @@ RUN ( sleep 4 && while [ 1 ]; do sleep 1; echo y; done ) | android update sdk --
     platform-tool,android-25,android-26,build-tools-25.0.3,build-tools-26.0.1,extra-android-support,extra-android-m2repository,extra-google-m2repository && \
     echo "y" | android update adb
 
-# RUN which adb
-# RUN which android
-
 # Gradle 5.2.1
 ENV GRADLE_HOME=/usr/local/gradle-5.2.1
 ENV PATH=$GRADLE_HOME/bin:$PATH
 
 RUN curl -o gradle-5.2.1-all.zip -L https://services.gradle.org/distributions/gradle-5.2.1-all.zip && unzip gradle-5.2.1-all.zip -d /usr/local > /dev/null
-
-# Nodejs Environment Path
-ENV PATH=$PATH:/opt/node-v6.11.4-linux-x64/bin
-RUN curl -o node-v6.11.4-linux-x64.tar.xz https://nodejs.org/dist/v6.11.4/node-v6.11.4-linux-x64.tar.xz && tar -C /opt -Jxvf node-v6.11.4-linux-x64.tar.xz > /dev/null
-
-RUN npm i -g macaca-cli
-RUN npm i -g macaca-android
-RUN macaca -v
-RUN macaca doctor
 
 # Run sshd
 RUN mkdir /var/run/sshd && \
@@ -111,10 +69,3 @@ RUN mkdir /var/run/sshd && \
 RUN echo "y" | android update sdk -a --no-ui --filter sys-img-x86_64-android-21,Android-21
 
 VOLUME /data
-
-# ADD entrypoint.sh /entrypoint.sh
-# ADD kvmconfig.sh /kvmconfig.sh
-# RUN chmod +x /entrypoint.sh
-# RUN chmod +x /kvmconfig.sh
-
-# ENTRYPOINT ["/entrypoint.sh"]
